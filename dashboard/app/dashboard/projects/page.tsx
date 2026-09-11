@@ -6,11 +6,12 @@ import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { CreateProjectModal } from "@/components/dashboard/CreateProjectModal";
 import { ApiKeySuccessDialog } from "@/components/dashboard/ApiKeySuccessDialog";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import type { Project } from "@/types/project";
 import axios from "axios";
 type LoadState = "loading" | "error" | "success";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [modalOpen,setModalOpen] = useState(false);
   const [successApiKey, setSuccessApiKey] = useState("");
