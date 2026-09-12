@@ -1,14 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-export default function VerifyOTPPage() {
+
+function VerifyOTPForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const params=useSearchParams();
-  const email=params.get("email");
-  const router=useRouter()
+  const params = useSearchParams();
+  const email = params.get("email");
+  const router = useRouter();
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (value: string, index: number) => {
@@ -32,23 +33,21 @@ export default function VerifyOTPPage() {
     }
   };
 
-  const handleVerify = async() => {
-    const finalotp=otp.join("")
-    const verifyotp=await axios.post("http://localhost:3001/api/verifyotp",{
-        otp:finalotp,
-        email:email
-    })
-    if(!verifyotp){
-        alert("Something went wrong")
+  const handleVerify = async () => {
+    const finalotp = otp.join("");
+    const verifyotp = await axios.post("http://localhost:3001/api/verifyotp", {
+      otp: finalotp,
+      email: email,
+    });
+    if (!verifyotp) {
+      alert("Something went wrong");
     }
-    router.push("/login")
-   
+    router.push("/login");
   };
 
   return (
     <div className="min-h-screen bg-[#030712] flex items-center justify-center px-6">
       <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-xl">
-
         <h1 className="text-3xl font-semibold text-white text-center">
           Verify Email
         </h1>
@@ -78,13 +77,18 @@ export default function VerifyOTPPage() {
           Verify OTP
         </button>
 
-        <button
-          className="mt-4 w-full text-sm text-slate-400 hover:text-white transition"
-        >
+        <button className="mt-4 w-full text-sm text-slate-400 hover:text-white transition">
           Resend Code
         </button>
-
       </div>
     </div>
+  );
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyOTPForm />
+    </Suspense>
   );
 }
