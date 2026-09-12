@@ -1,6 +1,10 @@
 import type React from "react";
 
 declare module "react" {
+  interface ClassAttributes<T> {
+    ref?: any;
+  }
+
   namespace JSX {
     interface IntrinsicAttributes {
       [key: string]: any;
