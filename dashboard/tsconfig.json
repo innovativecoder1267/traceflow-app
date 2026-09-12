@@ -7,7 +7,6 @@
     "strict": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
-    "noCheck": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
