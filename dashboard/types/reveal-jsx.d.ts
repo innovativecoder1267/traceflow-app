@@ -12,4 +12,16 @@ declare module "react" {
   }
 }
 
+declare module "react/jsx-runtime" {
+  namespace JSX {
+    interface IntrinsicAttributes {
+      [key: string]: any;
+    }
+
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
+
 export {};
