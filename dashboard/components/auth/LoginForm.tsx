@@ -46,7 +46,7 @@ export function LoginForm() {
     setErrors({});
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/api/login", {
+      const res = await fetch("https://traceflow-app-k2ed.vercel.app/api/login", {
         method: "POST",
         credentials:"include",
         headers: { "Content-Type": "application/json" },
