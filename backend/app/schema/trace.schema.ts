@@ -57,5 +57,5 @@ const traceSchema = new Schema(
     timestamps: true,
   }
 );
-const Trace=mongoose.models.trace|| model("trace",traceSchema)
-export default Trace
+const Trace: mongoose.Model<any> = mongoose.models.trace || model("trace",traceSchema);
+export default Trace;
