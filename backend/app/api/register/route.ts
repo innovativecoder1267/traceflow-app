@@ -1,7 +1,7 @@
 import userSchema from "@/app/schema/user.schema";
 import { NextResponse } from "next/server";
 import { DbConnection } from "@/lib/db.connection";
-import { sendOtpEmail } from "@/lib/email";
+import sendmail from "@/lib/email";
 import bcrypt from "bcrypt"
 export async function POST(req:Request){
     await DbConnection();
@@ -31,7 +31,7 @@ export async function POST(req:Request){
     }
 
     try {
-        await sendOtpEmail(email, otp);
+        await sendmail(email, otp);
     } catch (error) {
         console.error("[REGISTER] OTP email failed:", error);
         return NextResponse.json({message:"User created but OTP email could not be sent"}, {status:500})
