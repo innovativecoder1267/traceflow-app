@@ -46,13 +46,23 @@ export function RegisterForm() {
     setErrors({});
     setLoading(true);
     try {
-      const res = await axios.post("https://traceflow-app-k2ed.vercel.app/api/register", {
+      const apiUrl = typeof window !== "undefined" && window.location.hostname === "localhost"
+        ? "http://localhost:3001/api/register"
+        : "https://traceflow-app-k2ed.vercel.app/api/register";
+
+      console.log("[REGISTER DEBUG] Request URL:", apiUrl);
+      console.log("[REGISTER DEBUG] Origin:", window.location.origin);
+
+      const res = await axios.post(apiUrl, {
         username: username.trim(),
         email: email.trim(),
         password: password,
-      });
+      }, { withCredentials: true });
+
+      console.log("[REGISTER DEBUG] Response status:", res.status);
+      console.log("[REGISTER DEBUG] Response data:", res.data);
+
       if (res.status === 200) {
-        console.log(res.data);
         router.push(`/verifyotp?email=${encodeURIComponent(email)}`);
         return;
       }
@@ -61,7 +71,12 @@ export function RegisterForm() {
       } else {
         setServerError("Something went wrong, please try again");
       }
-    } catch {
+    } catch (error: any) {
+      console.error("[REGISTER DEBUG] Request failed");
+      console.error("[REGISTER DEBUG] Status:", error?.response?.status);
+      console.error("[REGISTER DEBUG] Response headers:", error?.response?.headers);
+      console.error("[REGISTER DEBUG] Response data:", error?.response?.data);
+      console.error("[REGISTER DEBUG] Error:", error);
       setServerError("Something went wrong, please try again");
     } finally {
       setLoading(false);
