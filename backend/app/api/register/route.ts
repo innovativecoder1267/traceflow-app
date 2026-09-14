@@ -3,39 +3,68 @@ import { NextResponse } from "next/server";
 import { DbConnection } from "@/lib/db.connection";
 import sendmail from "@/lib/email";
 import bcrypt from "bcrypt"
+
 export async function POST(req:Request){
-    await DbConnection();
-    const {username,email,password}=await req.json()
-    if(!username||!email||!password){
-        return NextResponse.json({message:"Cant find username or email or password"})
-    }
-    const finduser=await userSchema.findOne({email:email})
-    if(finduser && finduser.verified){
-        return NextResponse.json({message:"User already exists"})
-    }
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    const hashpassword=await bcrypt.hash(password,10)
-    if(!hashpassword){
-        return NextResponse.json({message:"Cant hash the password"})
-    }
-    const newuser=await userSchema.create({
-        username:username,
-        email:email,
-        password:hashpassword,
-        otp:otp,
-        otpexpiry:otpExpiresAt
-    })
-    if(!newuser){
-        return NextResponse.json({message:"User not created"})
-    }
+    let step = "starting registration";
 
     try {
-        await sendmail(email, otp);
-    } catch (error) {
-        console.error("[REGISTER] OTP email failed:", error);
-        return NextResponse.json({message:"User created but OTP email could not be sent"}, {status:500})
-    }
+        step = "connecting to database";
+        await DbConnection();
 
-    return NextResponse.json({message:"User created successfully"})
+        step = "reading request body";
+        const {username,email,password}=await req.json()
+        if(!username||!email||!password){
+            return NextResponse.json({message:"Cant find username or email or password"})
+        }
+
+        step = "checking existing user";
+        const finduser=await userSchema.findOne({email:email})
+        if(finduser && finduser.verified){
+            return NextResponse.json({message:"User already exists"})
+        }
+
+        step = "generating OTP";
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+        step = "hashing password";
+        const hashpassword=await bcrypt.hash(password,10)
+        if(!hashpassword){
+            return NextResponse.json({message:"Cant hash the password"})
+        }
+
+        step = "creating user";
+        const newuser=await userSchema.create({
+            username:username,
+            email:email,
+            password:hashpassword,
+            otp:otp,
+            otpexpiry:otpExpiresAt
+        })
+        if(!newuser){
+            return NextResponse.json({message:"User not created"})
+        }
+
+        step = "sending OTP email";
+        await sendmail(email, otp);
+
+        return NextResponse.json({message:"User created successfully"})
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorName = error instanceof Error ? error.name : "UnknownError";
+
+        console.error("[REGISTER] Registration failed", {
+            step,
+            errorName,
+            errorMessage,
+            error
+        });
+
+        return NextResponse.json({
+            message: "Registration failed",
+            step,
+            error: errorMessage,
+            errorName
+        }, {status:500})
+    }
 }
