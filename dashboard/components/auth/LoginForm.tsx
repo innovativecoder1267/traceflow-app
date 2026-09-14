@@ -46,12 +46,23 @@ export function LoginForm() {
     setErrors({});
     setLoading(true);
     try {
-      const res = await fetch("https://traceflow-app-k2ed.vercel.app/api/login", {
+      const loginUrl = "https://traceflow-app-k2ed.vercel.app/api/login";
+      console.log("[LOGIN DEBUG] Sending request:", { url: loginUrl, email: email.trim() });
+      const res = await fetch(loginUrl, {
         method: "POST",
         credentials:"include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
       });
+
+      const responseText = await res.text();
+      console.log("[LOGIN DEBUG] Response:", {
+        status: res.status,
+        statusText: res.statusText,
+        headers: Object.fromEntries(res.headers.entries()),
+        body: responseText,
+      });
+
       if (res.ok) {
         router.push("/dashboard");
         return;
@@ -59,9 +70,10 @@ export function LoginForm() {
       if (res.status === 401) {
         setServerError("Invalid email or password");
       } else {
-        setServerError("Something went wrong, please try again");
+        setServerError(`Login failed (${res.status}). Check browser console for details.`);
       }
-    } catch {
+    } catch (error) {
+      console.error("[LOGIN DEBUG] Fetch error:", error);
       setServerError("Something went wrong, please try again");
     } finally {
       setLoading(false);
