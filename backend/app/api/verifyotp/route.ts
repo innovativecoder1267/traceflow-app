@@ -1,7 +1,10 @@
 import User from "@/app/schema/user.schema";
 import { NextResponse } from "next/server";
+import { DbConnection } from "@/lib/db.connection";
 
 export async function POST(req:Request){
+    await DbConnection();
+
     const {email,otp}=await req.json()
     if(!email||!otp){
         return NextResponse.json({message:"Cant find email or otp"})
