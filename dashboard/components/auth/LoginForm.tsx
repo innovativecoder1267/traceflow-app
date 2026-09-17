@@ -45,36 +45,95 @@ export function LoginForm() {
     }
     setErrors({});
     setLoading(true);
+
+    const loginUrl = "https://traceflow-app-k2ed.vercel.app/api/login";
+
     try {
-      const loginUrl = "https://traceflow-app-k2ed.vercel.app/api/login";
-      console.log("[LOGIN DEBUG] Sending request:", { url: loginUrl, email: email.trim() });
+      console.log("[LOGIN DEBUG] ===== LOGIN REQUEST START =====");
+      console.log("[LOGIN DEBUG] URL:", loginUrl);
+      console.log("[LOGIN DEBUG] Email:", email.trim());
+
       const res = await fetch(loginUrl, {
         method: "POST",
-        credentials:"include",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const responseText = await res.text();
-      console.log("[LOGIN DEBUG] Response:", {
+      let responseBody: unknown = responseText;
+
+      try {
+        responseBody = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        // Keep the raw response when the server does not return JSON.
+      }
+
+      const debugInfo = {
         status: res.status,
         statusText: res.statusText,
+        ok: res.ok,
+        url: res.url,
         headers: Object.fromEntries(res.headers.entries()),
-        body: responseText,
-      });
+        body: responseBody,
+      };
 
       if (res.ok) {
+        console.log("[LOGIN DEBUG] Login successful:", debugInfo);
+        console.log("[LOGIN DEBUG] ===== LOGIN REQUEST END =====");
         router.push("/dashboard");
         return;
       }
+
+      console.error("[LOGIN DEBUG] Login API returned an error:", debugInfo);
+      console.error("[LOGIN DEBUG] Server error details:", {
+        status: res.status,
+        error: typeof responseBody === "object" && responseBody !== null && "error" in responseBody
+          ? responseBody.error
+          : undefined,
+        message: typeof responseBody === "object" && responseBody !== null && "message" in responseBody
+          ? responseBody.message
+          : undefined,
+        rawBody: responseText,
+      });
+      console.log("[LOGIN DEBUG] ===== LOGIN REQUEST END =====");
+
       if (res.status === 401) {
-        setServerError("Invalid email or password");
+        setServerError(
+          typeof responseBody === "object" && responseBody !== null && "error" in responseBody
+            ? String(responseBody.error)
+            : "Invalid email or password"
+        );
+      } else if (res.status === 403) {
+        setServerError(
+          typeof responseBody === "object" && responseBody !== null && "error" in responseBody
+            ? String(responseBody.error)
+            : "Please verify your email first"
+        );
+      } else if (res.status >= 500) {
+        setServerError(
+          typeof responseBody === "object" && responseBody !== null && "message" in responseBody
+            ? String(responseBody.message)
+            : `Server error (${res.status}). Check browser console for details.`
+        );
       } else {
-        setServerError(`Login failed (${res.status}). Check browser console for details.`);
+        setServerError(
+          typeof responseBody === "object" && responseBody !== null && "error" in responseBody
+            ? String(responseBody.error)
+            : `Login failed (${res.status}). Check browser console for details.`
+        );
       }
     } catch (error) {
-      console.error("[LOGIN DEBUG] Fetch error:", error);
-      setServerError("Something went wrong, please try again");
+      console.error("[LOGIN DEBUG] ===== FETCH ERROR =====");
+      console.error("[LOGIN DEBUG] Request failed before receiving a response:", error);
+      console.error("[LOGIN DEBUG] Error details:", {
+        name: error instanceof Error ? error.name : "UnknownError",
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        url: loginUrl,
+      });
+      console.error("[LOGIN DEBUG] ===== FETCH ERROR END =====");
+      setServerError("Something went wrong, please check the browser console");
     } finally {
       setLoading(false);
     }
