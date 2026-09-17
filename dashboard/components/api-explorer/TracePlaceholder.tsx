@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Trace } from "@/types/trace";
+import { API_BASE_URL } from "@/lib/api";
 
 interface TracePlaceholderProps {
   projectId: string;
@@ -27,7 +28,7 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
 
       try {
         const response = await fetch(
-          `http://localhost:3001/api/traces?projectId=${encodeURIComponent(projectId)}`,
+          `${API_BASE_URL}/api/traces?projectId=${encodeURIComponent(projectId)}`,
           { credentials: "include", signal: controller.signal }
         );
 
