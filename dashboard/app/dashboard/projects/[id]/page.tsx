@@ -5,13 +5,14 @@ import { ArrowLeft } from "lucide-react";
 import { ApiExplorer } from "@/components/api-explorer/ApiExplorer";
 import type { Project } from "@/types/project";
 import axios from "axios";
-import { useState,useEffect } from "react"; 
+import { useState,useEffect } from "react";
 import { useParams } from "next/dist/client/components/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 async function getProject(id: string): Promise<{ data: Project | null; status: number; }> {
   console.log("Fetching project with ID:", id);
   try {
-    const res = await axios.get(`https://traceflow-app-k2ed.vercel.app/api/fetchproject/${id}`, { withCredentials: true });
+    const res = await axios.get(`${API_BASE_URL}/api/fetchproject/${id}`, { withCredentials: true });
     console.log("Response from API:", res.data);
     return { data: res.data.data, status: res.status };
   } catch (err: any) {
