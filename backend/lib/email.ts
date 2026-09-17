@@ -1,20 +1,34 @@
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 
-const resend = new Resend(process.env.RESEND_EMAIL_SECRET);
+const apiKey = process.env.SENDGRID_API_KEY;
+const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+
+if (!apiKey) {
+  throw new Error("SENDGRID_API_KEY is not configured");
+}
+
+if (!fromEmail) {
+  throw new Error("SENDGRID_FROM_EMAIL is not configured");
+}
+
+sgMail.setApiKey(apiKey);
 
 export default async function sendmail(email: string, otp: string) {
-  const { data, error } = await resend.emails.send({
-    from: "TraceFlow <noreply@traceflow-app.com>",
-    to: email,
-    subject: "TraceFlow verification OTP",
-    text: `Your OTP for the TraceFlow application is ${otp}.`,
-  });
+  try {
+    const [response] = await sgMail.send({
+      to: email,
+      from: {
+        email: fromEmail,
+        name: "TraceFlow",
+      },
+      subject: "TraceFlow verification OTP",
+      text: `Your OTP for the TraceFlow application is ${otp}.`,
+    });
 
-  if (error) {
-    console.error("Failed to send email:", error);
-    throw new Error(error.message);
+    console.log(`[EMAIL] OTP sent successfully. Status: ${response.statusCode}`);
+    return response;
+  } catch (error) {
+    console.error("[EMAIL] Failed to send OTP:", error);
+    throw error;
   }
-
-  console.log(`Email sent successfully: ${data?.id}`);
-  return data;
 }
