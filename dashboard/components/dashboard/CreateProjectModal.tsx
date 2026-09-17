@@ -11,7 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios"
+import axios from "axios";
+import { API_BASE_URL } from "@/lib/api";
+
 interface CreateProjectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,21 +25,26 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
   const [error, setError] = useState("");
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+
   function handleOpenChange(val: boolean) {
     if (!loading) { onOpenChange(val); if (!val) { setError(""); setServerError(""); } }
   }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setServerError("");
     if (!name.trim()) { setError("Project name is required"); return; }
     setError(""); setLoading(true);
     try {
-      const res = await axios.post("https://traceflow-app-k2ed.vercel.app/api/createproject", { name: name.trim() }, { withCredentials:true });
+      const res = await axios.post(`${API_BASE_URL}/api/createproject`, { name: name.trim() }, { withCredentials: true });
       const data = res.data;
       if (!res.data) { setServerError(data.error ?? "Failed to create project"); return; }
-      console.log("the api key is",res); setName(""); onSuccess(data.apiKey);
-    } catch { setServerError("Something went wrong, please try again"); }
-    finally { setLoading(false); }
+      console.log("the api key is", res); setName(""); onSuccess(data.apiKey);
+    } catch (err: any) {
+      console.error("[CREATE PROJECT] API error:", err.response?.data ?? err.message ?? err);
+      setServerError(err.response?.data?.error ?? err.response?.data?.message ?? "Something went wrong, please try again");
+    } finally { setLoading(false); }
   }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md">
