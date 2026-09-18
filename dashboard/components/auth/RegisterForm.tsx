@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/cn";
 import axios from "axios";
-import { API_BASE_URL } from "@/lib/api";
+
 
 interface FieldErrors {
   username?: string;
@@ -45,7 +45,7 @@ export function RegisterForm() {
     setErrors({});
     setLoading(true);
 
-    const apiUrl = `${API_BASE_URL}/api/register`;
+    const apiUrl = "https://traceflow-app-k2ed.vercel.app/api/register";
 
     try {
       console.log("[REGISTER DEBUG] Request URL:", apiUrl);
