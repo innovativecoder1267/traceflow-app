@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/cn";
-import { API_BASE_URL } from "@/lib/api";
+
 
 interface FieldErrors {
   email?: string;
@@ -47,7 +47,7 @@ export function LoginForm() {
     setErrors({});
     setLoading(true);
 
-    const loginUrl = `${API_BASE_URL}/api/login`;
+    const loginUrl = "https://traceflow-app-k2ed.vercel.app/api/login";
 
     try {
       console.log("[LOGIN DEBUG] ===== LOGIN REQUEST START =====");
