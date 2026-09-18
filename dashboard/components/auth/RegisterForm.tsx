@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/cn";
-import axios from "axios"
+import axios from "axios";
+import { API_BASE_URL } from "@/lib/api";
+
 interface FieldErrors {
   username?: string;
   email?: string;
@@ -26,11 +28,8 @@ export function RegisterForm() {
   function validate(): FieldErrors {
     const e: FieldErrors = {};
     if (!username.trim()) e.username = "Username is required";
-    if (!email.trim()) {
-      e.email = "Email is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      e.email = "Enter a valid email address";
-    }
+    if (!email.trim()) e.email = "Email is required";
+    else if (!/^\S+@\S+\.\S+$/.test(email.trim())) e.email = "Enter a valid email address";
     if (!password) e.password = "Password is required";
     return e;
   }
@@ -45,18 +44,17 @@ export function RegisterForm() {
     }
     setErrors({});
     setLoading(true);
-    try {
-      const apiUrl = typeof window !== "undefined" && window.location.hostname === "localhost"
-        ? "http://localhost:3001/api/register"
-        : "https://traceflow-app-k2ed.vercel.app/api/register";
 
+    const apiUrl = `${API_BASE_URL}/api/register`;
+
+    try {
       console.log("[REGISTER DEBUG] Request URL:", apiUrl);
       console.log("[REGISTER DEBUG] Origin:", window.location.origin);
 
       const res = await axios.post(apiUrl, {
         username: username.trim(),
         email: email.trim(),
-        password: password,
+        password,
       }, { withCredentials: true });
 
       console.log("[REGISTER DEBUG] Response status:", res.status);
@@ -66,18 +64,13 @@ export function RegisterForm() {
         router.push(`/verifyotp?email=${encodeURIComponent(email)}`);
         return;
       }
-      if (res.status === 409) {
-        setServerError("An account with this email already exists");
-      } else {
-        setServerError("Something went wrong, please try again");
-      }
+      if (res.status === 409) setServerError("An account with this email already exists");
+      else setServerError("Something went wrong, please try again");
     } catch (error: any) {
-      console.error("[REGISTER DEBUG] Request failed");
       console.error("[REGISTER DEBUG] Status:", error?.response?.status);
-      console.error("[REGISTER DEBUG] Response headers:", error?.response?.headers);
       console.error("[REGISTER DEBUG] Response data:", error?.response?.data);
       console.error("[REGISTER DEBUG] Error:", error);
-      setServerError("Something went wrong, please try again");
+      setServerError(error?.response?.data?.error ?? error?.response?.data?.message ?? "Something went wrong, please try again");
     } finally {
       setLoading(false);
     }
