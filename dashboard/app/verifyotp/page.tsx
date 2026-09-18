@@ -4,6 +4,7 @@ import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
 function VerifyOTPForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -26,7 +27,7 @@ function VerifyOTPForm() {
 
   const handleVerify = async () => {
     const finalotp = otp.join("");
-    const verifyotp = await axios.post("https://traceflow-app-k2ed.vercel.app/api/verifyotp", { otp: finalotp, email });
+    const verifyotp = await axios.post(`${API_BASE_URL}/api/verifyotp`, { otp: finalotp, email }, { withCredentials: true });
     if (!verifyotp) alert("Something went wrong");
     router.push("/login");
   };
