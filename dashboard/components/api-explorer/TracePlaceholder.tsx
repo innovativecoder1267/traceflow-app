@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Trace } from "@/types/trace";
-import { API_BASE_URL } from "@/lib/api";
 
 interface TracePlaceholderProps {
   projectId: string;
@@ -28,7 +27,7 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
 
       try {
         const response = await fetch(
-          `${API_BASE_URL}/api/traces?projectId=${encodeURIComponent(projectId)}`,
+          `https://traceflow-app-k2ed.vercel.app/api/traces?projectId=${encodeURIComponent(projectId)}`,
           { credentials: "include", signal: controller.signal }
         );
 
@@ -60,42 +59,23 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
       </CardHeader>
       <CardContent className="space-y-3">
         {loading ? (
-          <p className="text-xs text-[var(--color-muted-foreground)]">
-            Loading traces…
-          </p>
+          <p className="text-xs text-[var(--color-muted-foreground)]">Loading traces…</p>
         ) : error ? (
           <p className="text-xs text-[var(--color-destructive)]">{error}</p>
         ) : traces.length === 0 ? (
-          <p className="text-xs text-[var(--color-muted-foreground)]">
-            No traces captured for this project yet.
-          </p>
+          <p className="text-xs text-[var(--color-muted-foreground)]">No traces captured for this project yet.</p>
         ) : (
           <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
             {traces.map((trace) => (
-              <div
-                key={trace._id}
-                className="space-y-1.5 rounded-md border border-[var(--color-border)] px-3 py-2 text-xs"
-              >
+              <div key={trace._id} className="space-y-1.5 rounded-md border border-[var(--color-border)] px-3 py-2 text-xs">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono font-medium text-[var(--color-foreground)]">
-                    {trace.method} {trace.route}
-                  </span>
-                  <span
-                    className={
-                      trace.statusCode >= 200 && trace.statusCode < 400
-                        ? "text-[var(--color-success)]"
-                        : "text-[var(--color-destructive)]"
-                    }
-                  >
+                  <span className="font-mono font-medium text-[var(--color-foreground)]">{trace.method} {trace.route}</span>
+                  <span className={trace.statusCode >= 200 && trace.statusCode < 400 ? "text-[var(--color-success)]" : "text-[var(--color-destructive)]"}>
                     {trace.statusCode} · {trace.statusCode >= 200 && trace.statusCode < 400 ? "Success" : "Failure"}
                   </span>
                 </div>
-                <p className="text-[var(--color-muted-foreground)]">
-                  {trace.duration}ms · {formatStartedAt(trace.startedAt)}
-                </p>
-                <p className="break-all font-mono text-[10px] text-[var(--color-muted-foreground)]">
-                  {trace.traceId}
-                </p>
+                <p className="text-[var(--color-muted-foreground)]">{trace.duration}ms · {formatStartedAt(trace.startedAt)}</p>
+                <p className="break-all font-mono text-[10px] text-[var(--color-muted-foreground)]">{trace.traceId}</p>
               </div>
             ))}
           </div>
