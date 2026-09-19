@@ -8,7 +8,6 @@ import { ApiKeySuccessDialog } from "@/components/dashboard/ApiKeySuccessDialog"
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import type { Project } from "@/types/project";
 import axios from "axios";
-import { API_BASE_URL } from "@/lib/api";
 
 type LoadState = "loading" | "error" | "success";
 
@@ -22,7 +21,7 @@ export default function ProjectsPage() {
   const fetchProjects = useCallback(async () => {
     setLoadState("loading");
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/projects`, { withCredentials: true });
+      const res = await axios.get("https://traceflow-app-k2ed.vercel.app/api/projects", { withCredentials: true });
       console.log(res.data);
       setProjects(res.data.data);
       setLoadState("success");
