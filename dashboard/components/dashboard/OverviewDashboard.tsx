@@ -89,7 +89,7 @@ export function OverviewDashboard() {
       setTracesError(false);
 
       try {
-        const projectsRes = await axios.get(`http://localhost:3001/api/projects`, {
+        const projectsRes = await axios.get(`https://traceflow-app-k2ed.vercel.app/api/projects`, {
           withCredentials: true,
           signal: controller.signal,
         });
@@ -100,7 +100,7 @@ export function OverviewDashboard() {
         const traceResults = await Promise.allSettled(
           userProjects.map(async (project) => {
             const response = await fetch(
-              `http://localhost:3001/api/traces?projectId=${encodeURIComponent(project._id)}`,
+              `https://traceflow-app-k2ed.vercel.app/api/traces?projectId=${encodeURIComponent(project._id)}`,
               { credentials: "include", signal: controller.signal }
             );
 
@@ -159,7 +159,7 @@ export function OverviewDashboard() {
   useEffect(() => {
     async function fetchActivetraces() {
       try {
-        const response=await axios.get("http://localhost:3001/api/fetch-trace", {
+        const response=await axios.get("https://traceflow-app-k2ed.vercel.app/api/fetch-trace", {
           withCredentials: true,
         });
       const tracesData: Trace[] = (response.data?.data ?? []).map(
