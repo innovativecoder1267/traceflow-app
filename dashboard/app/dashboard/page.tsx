@@ -5,11 +5,10 @@ import { RecentProjectsSection } from "@/components/dashboard/RecentProjectsSect
 import type { Project } from "@/types/project";
 import type { Trace } from "@/types/trace";
 import axios from "axios";
-import { API_BASE_URL } from "@/lib/api";
 
 async function getMetrics() {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/fetchproject`, { withCredentials: true });
+    const res = await axios.get("https://traceflow-app-k2ed.vercel.app/api/fetchproject", { withCredentials: true });
     if (!res.data) return { projects: 0, traces: 0, successRate: "—", activeSDKs: 0 };
     const projects: Project[] = await res.data.data;
     return { projects: projects.length, traces: 0, successRate: "—", activeSDKs: 0 };
@@ -18,7 +17,7 @@ async function getMetrics() {
 
 async function getRecentProjects(): Promise<{ data: Project[]; error: boolean }> {
   try {
-    const res = await axios.get(`${API_BASE_URL}/api/projects`, { withCredentials: true });
+    const res = await axios.get("https://traceflow-app-k2ed.vercel.app/api/projects", { withCredentials: true });
     if (!res.data) return { data: [], error: true };
     const data: Project[] = await res.data.data;
     return { data, error: false };
