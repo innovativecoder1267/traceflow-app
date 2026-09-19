@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
-import { API_BASE_URL } from "@/lib/api";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -35,7 +34,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
     if (!name.trim()) { setError("Project name is required"); return; }
     setError(""); setLoading(true);
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/createproject`, { name: name.trim() }, { withCredentials: true });
+      const res = await axios.post("https://traceflow-app-k2ed.vercel.app/api/createproject", { name: name.trim() }, { withCredentials: true });
       const data = res.data;
       if (!res.data) { setServerError(data.error ?? "Failed to create project"); return; }
       console.log("the api key is", res); setName(""); onSuccess(data.apiKey);
