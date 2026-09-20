@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const apiKey = process.env.RESEND_API_KEY;
+const apiKey = process.env.RESEND_EMAIL_SECRET;
 const fromEmail = process.env.RESEND_FROM_EMAIL;
 
 if (!apiKey) {
