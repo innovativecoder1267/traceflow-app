@@ -34,6 +34,8 @@ export async function POST(req:Request){
             finduser.otp=otp
             finduser.otpexpiry=otpExpiresAt
             
+            await sendmail(email, otp);
+
         }
 
         step = "generating OTP";
