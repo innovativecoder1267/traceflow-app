@@ -486,10 +486,9 @@ function Features() {
     <section className="tf-section">
       <Reveal className="tf-section-head">
         <span className="tf-eyebrow">capabilities</span>
-        <h2 className="tf-h2">Everything an on-call engineer actually opens</h2>
+        <h2 className="tf-h2">A focused workflow around requests and traces</h2>
         <p className="tf-section-sub">
-          Six tools that share one trace model, so context never gets lost
-          between them.
+          The core surfaces stay close to the request, so you can inspect what happened without unnecessary context switching.
         </p>
       </Reveal>
       <div className="tf-feat-grid">
@@ -672,16 +671,16 @@ function DashboardPreview() {
     <section className="tf-section">
       <Reveal className="tf-section-head">
         <span className="tf-eyebrow">product</span>
-        <h2 className="tf-h2">A dashboard built around one trace, not one metric</h2>
+        <h2 className="tf-h2">A dashboard built around the request</h2>
         <p className="tf-section-sub">
-          Every panel below is looking at the same request.
+          The interface keeps request context visible while you inspect the trace.
         </p>
       </Reveal>
       <Reveal delay={100} className="tf-dash">
         <div className="tf-dash-panel tf-dash-req">
           <div className="tf-dash-panel-head">
-            <span>Requests / min</span>
-            <span className="tf-dash-badge">1,204</span>
+            <span>Request activity</span>
+            <span className="tf-dash-badge">sample</span>
           </div>
           <div className="tf-dash-chart">
             <ResponsiveContainer width="100%" height={110}>
@@ -706,8 +705,8 @@ function DashboardPreview() {
  
         <div className="tf-dash-panel tf-dash-lat">
           <div className="tf-dash-panel-head">
-            <span>Latency percentiles</span>
-            <span className="tf-dash-badge tf-dash-badge-cyan">p99 108ms</span>
+            <span>Request timing</span>
+            <span className="tf-dash-badge tf-dash-badge-cyan">sample</span>
           </div>
           <div className="tf-dash-chart">
             <ResponsiveContainer width="100%" height={110}>
@@ -722,8 +721,8 @@ function DashboardPreview() {
  
         <div className="tf-dash-panel tf-dash-waterfall">
           <div className="tf-dash-panel-head">
-            <span>Trace waterfall — req_8f2a19c</span>
-            <span className="tf-dash-badge">66ms total</span>
+            <span>Trace timeline — example</span>
+            <span className="tf-dash-badge">sample</span>
           </div>
           <div className="tf-dash-wf">
             {WATERFALL.map((w) => (
@@ -746,19 +745,19 @@ function DashboardPreview() {
  
         <div className="tf-dash-panel tf-dash-graph">
           <div className="tf-dash-panel-head">
-            <span>Service graph</span>
+            <span>Request path — example</span>
           </div>
           <FeatureGraph />
         </div>
  
         <div className="tf-dash-panel tf-dash-stat">
           <div className="tf-dash-panel-head">
-            <span>Error rate</span>
+            <span>Response status</span>
           </div>
           <div className="tf-dash-stat-value" style={{ color: "var(--emerald)" }}>
             2.1%
           </div>
-          <div className="tf-dash-stat-sub">example response status</div>
+          <div className="tf-dash-stat-sub">example response</div>
         </div>
  
         <div className="tf-dash-panel tf-dash-stat">
@@ -768,7 +767,7 @@ function DashboardPreview() {
           <div className="tf-dash-stat-value" style={{ color: "var(--cyan)" }}>
             124ms
           </div>
-          <div className="tf-dash-stat-sub">example request duration</div>
+          <div className="tf-dash-stat-sub">example timing</div>
         </div>
       </Reveal>
     </section>
