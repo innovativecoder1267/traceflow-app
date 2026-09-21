@@ -142,16 +142,11 @@ function NavBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   const links = ["Product", "Pricing", "Docs"];
-  const linked=[{
-    name:"product",
-    path:"#"
-  },{
-    name:"Pricing",
-    path:"#"
-  },{
-    name:"Docs",
-    path:"../traceflow-docs"
-  }]
+  const linked=[
+    { name:"Product", path:"/product" },
+    { name:"Pricing", path:"#pricing" },
+    { name:"Docs", path:"../traceflow-docs" }
+  ]
   return (
     <header className={`tf-nav ${scrolled ? "tf-nav-scrolled" : ""}`}>
       <div className="tf-nav-inner">
@@ -188,9 +183,9 @@ function NavBar() {
       </div>
       {open && (
         <div className="tf-nav-mobile">
-          {links.map((l) => (
-            <a key={l} href="#">
-              {l}
+          {linked.map((l) => (
+            <a key={l.name} href={l.path}>
+              {l.name}
             </a>
           ))}
           <button className="tf-btn tf-btn-solid" style={{ width: "100%" }}>
@@ -880,81 +875,34 @@ function Testimonials() {
 /* Pricing                                                                   */
 /* ----------------------------------------------------------------------- */
  
-const PLANS = [
-  {
-    name: "Starter",
-    price: "$0",
-    period: "/mo",
-    desc: "For side projects finding their first users.",
-    features: ["1 service", "3 day trace retention", "Community support"],
-    cta: "Start free",
-  },
-  {
-    name: "Pro",
-    price: "$79",
-    period: "/mo",
-    desc: "For teams running production workloads.",
-    features: [
-      "Unlimited services",
-      "30 day trace retention",
-      "Custom spans + alerts",
-      "Priority support",
-    ],
-    cta: "Start free trial",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    desc: "For orgs with compliance and scale needs.",
-    features: ["SSO + audit logs", "1 year retention", "Dedicated ingest", "SLA + support"],
-    cta: "Talk to sales",
-  },
-];
- 
 function Pricing() {
   return (
-    <section className="tf-section">
+    <section className="tf-section" id="pricing">
       <Reveal className="tf-section-head">
         <span className="tf-eyebrow">pricing</span>
-        <h2 className="tf-h2">Priced for teams, not per-seat headaches</h2>
+        <h2 className="tf-h2">Pricing is coming soon</h2>
+        <p className="tf-section-sub">
+          TraceFlow is still being actively built. We want to understand the
+          product, usage patterns, and infrastructure costs before introducing
+          pricing.
+        </p>
       </Reveal>
-      <div className="tf-pricing-grid">
-        {PLANS.map((p, i) => (
-          <Reveal
-            delay={i * 90}
-            key={p.name}
-            className={`tf-plan ${p.highlight ? "tf-plan-highlight" : ""}`}
-          >
-            {p.highlight && <span className="tf-plan-tag">Most popular</span>}
-            <div className="tf-plan-name">{p.name}</div>
-            <div className="tf-plan-price">
-              {p.price}
-              <span className="tf-plan-period">{p.period}</span>
-            </div>
-            <p className="tf-plan-desc">{p.desc}</p>
-            <ul className="tf-plan-features">
-              {p.features.map((f) => (
-                <li key={f}>
-                  <Check size={14} /> {f}
-                </li>
-              ))}
-            </ul>
-            <button
-              className={`tf-btn ${p.highlight ? "tf-btn-solid" : "tf-btn-outline"}`}
-              style={{ width: "100%", justifyContent: "center" }}
-            >
-              {p.cta}
-            </button>
-          </Reveal>
-        ))}
-      </div>
+      <Reveal className="tf-coming-soon-card">
+        <div className="tf-coming-soon-icon"><Sparkles size={20} /></div>
+        <div>
+          <h3 className="tf-coming-soon-title">Built first. Priced thoughtfully.</h3>
+          <p className="tf-coming-soon-copy">
+            The current focus is on building a useful tracing experience for
+            Express developers, solo developers, and startups. Pricing will be
+            announced once the product is ready for its next stage.
+          </p>
+        </div>
+        <span className="tf-coming-soon-badge">COMING SOON</span>
+      </Reveal>
     </section>
   );
 }
- 
-/* ----------------------------------------------------------------------- */
+
 /* FAQ                                                                       */
 /* ----------------------------------------------------------------------- */
  
@@ -1299,7 +1247,35 @@ function Style() {
       .tf-plan-features li { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #cbd5e1; }
       .tf-plan-features svg { color: var(--emerald); flex-shrink: 0; }
  
-      /* ---------- faq ---------- */
+            /* ---------- pricing coming soon ---------- */
+      .tf-coming-soon-card {
+        max-width: 820px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 28px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.09), rgba(34,211,238,0.04));
+        position: relative;
+        overflow: hidden;
+      }
+      .tf-coming-soon-icon {
+        width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--cyan); background: rgba(34,211,238,0.09);
+        border: 1px solid rgba(34,211,238,0.18);
+      }
+      .tf-coming-soon-title { margin: 0 0 6px; font-family: var(--display); font-size: 17px; font-weight: 600; }
+      .tf-coming-soon-copy { margin: 0; max-width: 610px; color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+      .tf-coming-soon-badge {
+        margin-left: auto; flex-shrink: 0; font-family: var(--mono); font-size: 10px;
+        letter-spacing: 0.05em; color: var(--indigo-soft); background: rgba(99,102,241,0.1);
+        border: 1px solid rgba(99,102,241,0.22); padding: 6px 9px; border-radius: 999px;
+      }
+
+/* ---------- faq ---------- */
       .tf-faq-list { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
       .tf-faq-item { border: 1px solid var(--border); border-radius: 12px; background: var(--card); overflow: hidden; }
       .tf-faq-q { width: 100%; text-align: left; background: none; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; color: var(--text); font-size: 14.5px; font-weight: 500; }
