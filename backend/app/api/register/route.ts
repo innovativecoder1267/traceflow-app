@@ -22,6 +22,19 @@ export async function POST(req:Request){
         if(finduser && finduser.verified){
             return NextResponse.json({message:"User already exists"})
         }
+        if(finduser && !finduser.verified){
+        const hashpassword=await bcrypt.hash(password,10)
+        if(!hashpassword){
+            return NextResponse.json({message:"Cant hash the password"})
+        }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+            finduser.username=username
+            finduser.password=hashpassword
+            finduser.otp=otp
+            finduser.otpexpiry=otpExpiresAt
+            
+        }
 
         step = "generating OTP";
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
