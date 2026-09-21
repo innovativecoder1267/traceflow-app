@@ -162,7 +162,6 @@ function NavBar() {
           <Link href="/login" className="tf-nav-link tf-nav-login">
             Log in
           </Link>
-          <button className="tf-btn tf-btn-ghost">Dashboard</button>
         <Link
   href="/register"
   className="tf-btn tf-btn-solid"
@@ -316,12 +315,9 @@ function Hero() {
           </p>
         </Reveal>
         <Reveal delay={240} className="tf-hero-ctas">
-          <button className="tf-btn tf-btn-solid tf-btn-lg">
+          <Link href="/register" className="tf-btn tf-btn-solid tf-btn-lg">
             Explore TraceFlow <ArrowRight size={16} />
-          </button>
-          <button className="tf-btn tf-btn-outline tf-btn-lg">
-            <TerminalIcon size={15} /> Inspect a request
-          </button>
+          </Link>
         </Reveal>
         <Reveal delay={340} className="tf-hero-visual">
           <HeroGraph />
