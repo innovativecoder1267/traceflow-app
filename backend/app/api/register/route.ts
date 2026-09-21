@@ -23,19 +23,27 @@ export async function POST(req:Request){
             return NextResponse.json({message:"User already exists"})
         }
         if(finduser && !finduser.verified){
-        const hashpassword=await bcrypt.hash(password,10)
-        if(!hashpassword){
-            return NextResponse.json({message:"Cant hash the password"})
-        }
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-            finduser.username=username
-            finduser.password=hashpassword
-            finduser.otp=otp
-            finduser.otpexpiry=otpExpiresAt
-            
+            step = "regenerating OTP for unverified user";
+            const hashpassword = await bcrypt.hash(password,10);
+            if(!hashpassword){
+                return NextResponse.json({message:"Cant hash the password"});
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+            finduser.username = username;
+            finduser.password = hashpassword;
+            finduser.otp = otp;
+            finduser.otpexpiry = otpExpiresAt;
+
+            step = "saving updated unverified user";
+            await finduser.save();
+
+            step = "sending OTP email to unverified user";
             await sendmail(email, otp);
 
+            return NextResponse.json({message:"OTP sent successfully"});
         }
 
         step = "generating OTP";
