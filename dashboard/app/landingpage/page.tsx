@@ -315,7 +315,11 @@ function Hero() {
           </p>
         </Reveal>
         <Reveal delay={240} className="tf-hero-ctas">
-          <Link href="/register" className="tf-btn tf-btn-solid tf-btn-lg">
+          <Link
+            href="/register"
+            className="tf-btn tf-btn-solid tf-btn-lg"
+            style={{ color: "#05070d" }}
+          >
             Explore TraceFlow <ArrowRight size={16} />
           </Link>
         </Reveal>
