@@ -529,34 +529,61 @@ app.get("/users", (req, res) => {
             </div>
             <h2>Custom Spans</h2>
             <p>
-              A trace is the complete request. A span is one piece of work inside that
-              request, such as authenticating a user, querying a database, or calculating
-              an order total.
+              Custom spans let you record a specific operation inside an automatically
+              captured request trace. Use them for work such as database queries,
+              external API calls, cache operations, or important application logic.
             </p>
-            <CodeBlock
-              lang="text"
-              filename="conceptual request breakdown"
-              code={`GET /orders — 900ms
-├── database query — 760ms
-├── business logic — 100ms
-└── response — 40ms`}
-            />
             <p>
-              Traces answer, “The request was slow.” Spans can answer, “Why was it slow?”
-              by showing the timing of individual operations.
+              Start a span with <code>traceflow.span()</code>, give it a name, run your
+              operation, and call <code>end()</code> when the operation finishes.
+              TraceFlow records the completed span in the current request's trace.
             </p>
-            <Callout type="info" title="Custom spans are coming soon">
-              Traces are available today and automatically capture incoming Express
-              requests. Custom spans will make it possible to break a request into
-              individual operations for a more detailed timing view.
-              <ul>
-                <li>Custom application spans</li>
-                <li>Detailed operation timing</li>
-                <li>Nested span visualization</li>
-              </ul>
+
+            <CodeBlock
+              lang="ts"
+              filename="server.ts"
+              code={`const traceflow = TraceFlow;
+
+app.get("/users", async (req, res) => {
+  const dbSpan = traceflow.span("database query");
+
+  const users = await User.find();
+
+  dbSpan.end();
+
+  res.json({ users });
+});`}
+            />
+
+            <p>
+              The span name is up to you. Keep it short and descriptive so it is easy
+              to understand when looking at a trace.
+            </p>
+
+            <CodeBlock
+              lang="ts"
+              filename="example"
+              code={`const span = traceflow.span("fetch user");
+
+const user = await fetchUser();
+
+span.end();`}
+            />
+
+            <Callout type="success" title="Span lifecycle">
+              <code>traceflow.span("name")</code> starts timing the operation.
+              Calling <code>end()</code> completes it and adds the span to the
+              current trace. If the request has no active TraceFlow trace, there is
+              nothing to record.
+            </Callout>
+
+            <Callout type="info" title="What appears in the dashboard">
+              Each completed span is shown inside its parent trace with its name,
+              duration, status, and available metadata. You can expand the trace to
+              inspect its spans without opening another page.
             </Callout>
           </Reveal>
- 
+
           <Reveal as="section" id="dashboard" delay={40} className="tfd-section">
             <div className="tfd-section-kicker">
               <LayoutDashboard size={13} /> Product
