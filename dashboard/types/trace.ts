@@ -1,3 +1,14 @@
+export interface Span {
+  name: string;
+  type?: string;
+  startedAt: string | number;
+  endedAt?: string | number;
+  duration: number;
+  status?: "success" | "error";
+  metadata?: Record<string, unknown>;
+  error?: unknown;
+}
+
 export interface Trace {
   _id: string;
   projectId: string;
@@ -11,7 +22,7 @@ export interface Trace {
   endedAt?: string;
   duration: number;
   status: "SUCCESS" | "ERROR";
-  spans?: string[];
+  spans?: Span[];
   createdAt: string;
   updatedAt?: string;
 }
