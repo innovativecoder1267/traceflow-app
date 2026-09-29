@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ChevronDown } from "lucide-react";
 import type { Span, Trace } from "@/types/trace";
 
 interface TracePlaceholderProps {
@@ -54,10 +55,8 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
     <Card className="border-[var(--color-border)] bg-[var(--color-card)]">
       <CardHeader>
         <CardTitle className="text-sm">Traces</CardTitle>
-        <p className="break-all font-mono text-[10px] text-[var(--color-muted-foreground)]">
-          Project ID: {projectId}
-        </p>
       </CardHeader>
+
       <CardContent className="space-y-3">
         {loading ? (
           <p className="text-xs text-[var(--color-muted-foreground)]">Loading traces…</p>
@@ -70,20 +69,25 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
         ) : (
           <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
             {traces.map((trace) => {
-              const traceKey = trace._id || trace.traceId || trace.id || `${trace.method}-${trace.startedAt}`;
+              const traceKey =
+                trace._id ||
+                trace.traceId ||
+                trace.id ||
+                `${trace.method}-${trace.startedAt}`;
               const isExpanded = expandedTraceId === traceKey;
               const spans = Array.isArray(trace.spans) ? trace.spans : [];
 
               return (
                 <div
                   key={traceKey}
-                  className="rounded-md border border-[var(--color-border)] px-3 py-2 text-xs"
+                  className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2.5 text-xs transition-colors duration-200 hover:border-[var(--color-muted-foreground)]/30"
                 >
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-mono font-medium text-[var(--color-foreground)]">
                         {trace.method} {trace.route}
                       </span>
+
                       <span
                         className={
                           trace.statusCode >= 200 && trace.statusCode < 400
@@ -102,62 +106,70 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
                       {trace.duration}ms · {formatStartedAt(trace.startedAt)}
                     </p>
 
-                    <p className="break-all font-mono text-[10px] text-[var(--color-muted-foreground)]">
-                      {trace.traceId || trace.id}
-                    </p>
-
                     <button
                       type="button"
                       onClick={() =>
                         setExpandedTraceId(isExpanded ? null : traceKey)
                       }
-                      className="pt-1 font-medium text-[var(--color-foreground)] hover:underline"
+                      className="group inline-flex items-center gap-1.5 rounded-md py-1 font-medium text-[var(--color-foreground)] transition-colors hover:text-[var(--color-muted-foreground)]"
+                      aria-expanded={isExpanded}
                     >
-                      {isExpanded ? "Hide spans" : `Spans · ${spans.length}`}
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform duration-300 ease-out ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                      />
+                      <span>{isExpanded ? "Hide spans" : `Spans · ${spans.length}`}</span>
                     </button>
                   </div>
 
-                  {isExpanded && (
-                    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
-                      {spans.length === 0 ? (
-                        <p className="text-xs text-[var(--color-muted-foreground)]">
-                          No span info found.
-                        </p>
-                      ) : (
-                        <div className="space-y-2">
-                          {spans.map((span: Span, index: number) => (
-                            <div
-                              key={`${span.name}-${index}`}
-                              className="rounded-md bg-[var(--color-muted)]/30 px-3 py-2"
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="font-medium text-[var(--color-foreground)]">
-                                  {span.name}
-                                </span>
-                                <span className="text-[var(--color-muted-foreground)]">
-                                  {span.duration}ms
-                                </span>
-                              </div>
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-out ${
+                      isExpanded
+                        ? "mt-2 grid-rows-[1fr] opacity-100"
+                        : "mt-0 grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <div className="border-t border-[var(--color-border)] pt-3">
+                        {spans.length === 0 ? (
+                          <p className="text-xs text-[var(--color-muted-foreground)]">
+                            No span info found.
+                          </p>
+                        ) : (
+                          <div className="space-y-2">
+                            {spans.map((span: Span, index: number) => (
+                              <div
+                                key={`${span.name}-${index}`}
+                                className="rounded-md border border-[var(--color-border)] bg-[var(--color-muted)]/20 px-3 py-2.5 transition-all duration-300"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-medium text-[var(--color-foreground)]">
+                                    {span.name}
+                                  </span>
+                                  <span className="font-mono text-[var(--color-muted-foreground)]">
+                                    {span.duration}ms
+                                  </span>
+                                </div>
 
-                              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[var(--color-muted-foreground)]">
-                                {span.type && <span>Type: {span.type}</span>}
-                                {span.status && (
-                                  <span>Status: {span.status}</span>
-                                )}
-                              </div>
+                                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[var(--color-muted-foreground)]">
+                                  {span.type && <span>Type: {span.type}</span>}
+                                  {span.status && <span>Status: {span.status}</span>}
+                                </div>
 
-                              {span.metadata &&
-                                Object.keys(span.metadata).length > 0 && (
-                                  <pre className="mt-2 overflow-x-auto rounded bg-[var(--color-background)] p-2 font-mono text-[10px] text-[var(--color-muted-foreground)]">
-                                    {JSON.stringify(span.metadata, null, 2)}
-                                  </pre>
-                                )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                                {span.metadata &&
+                                  Object.keys(span.metadata).length > 0 && (
+                                    <pre className="mt-2 overflow-x-auto rounded-md bg-[var(--color-background)] p-2 font-mono text-[10px] text-[var(--color-muted-foreground)]">
+                                      {JSON.stringify(span.metadata, null, 2)}
+                                    </pre>
+                                  )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               );
             })}
