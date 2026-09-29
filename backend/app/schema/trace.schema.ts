@@ -47,11 +47,29 @@ const traceSchema = new Schema(
      },
 
     spans: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Span",
-      },
-    ],
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    startedAt: {
+      type: Date,
+      required: true,
+    },
+    endedAt: {
+      type: Date,
+      required: true,
+    },
+    duration: {
+      type: Number,
+      required: true,
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+  },
+],
   },
   {
     timestamps: true,
