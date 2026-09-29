@@ -308,7 +308,7 @@ export function ApiExplorer({ projectName, projectId }: ApiExplorerProps) {
             </div>
           </div>
 
-          <aside className="flex w-full shrink-0 flex-col gap-4 lg:w-72">
+          <aside className="flex min-h-0 w-full shrink-0 flex-col gap-4 overflow-y-auto pr-1 lg:w-72">
             <Card className="border-[var(--color-border)] bg-[var(--color-card)]">
               <CardHeader>
                 <CardTitle className="text-sm">Request Summary</CardTitle>
