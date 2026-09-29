@@ -67,7 +67,7 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
             No traces captured for this project yet.
           </p>
         ) : (
-          <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
+          <div className="space-y-2 pr-1">
             {traces.map((trace) => {
               const traceKey =
                 trace._id ||
