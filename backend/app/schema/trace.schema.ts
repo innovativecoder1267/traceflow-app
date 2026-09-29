@@ -46,7 +46,7 @@ const traceSchema = new Schema(
       enum: ["SUCCESS", "ERROR"],
      },
 
-    spans: [
+spans: [
   {
     name: {
       type: String,
@@ -58,11 +58,13 @@ const traceSchema = new Schema(
     },
     endedAt: {
       type: Date,
-      required: true,
     },
     duration: {
       type: Number,
-      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["success", "error"],
     },
     metadata: {
       type: Schema.Types.Mixed,
