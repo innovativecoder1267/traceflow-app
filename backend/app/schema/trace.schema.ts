@@ -15,9 +15,8 @@ const traceSchema = new Schema(
 
     method: {
       type: String,
- 
+      
     },
-
     path: {
       type: String,
     },
@@ -40,13 +39,17 @@ const traceSchema = new Schema(
       type: Number,
       required: true,
     },
-
+    userId:{
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["SUCCESS", "ERROR"],
      },
 
-spans: [
+  spans: [
   {
     name: {
       type: String,
@@ -58,13 +61,11 @@ spans: [
     },
     endedAt: {
       type: Date,
+      required: true,
     },
     duration: {
       type: Number,
-    },
-    status: {
-      type: String,
-      enum: ["success", "error"],
+      required: true,
     },
     metadata: {
       type: Schema.Types.Mixed,
@@ -77,5 +78,5 @@ spans: [
     timestamps: true,
   }
 );
-const Trace: mongoose.Model<any> = mongoose.models.trace || model("trace",traceSchema);
-export default Trace;
+const Trace=mongoose.models.trace|| model("trace",traceSchema)
+export default Trace
