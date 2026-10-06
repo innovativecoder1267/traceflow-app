@@ -12,7 +12,6 @@ const traceSchema = new Schema(
       type: String,
       unique: true,
     },
-
     method: {
       type: String,
       
@@ -44,10 +43,7 @@ const traceSchema = new Schema(
       ref: "User",
       required: true,
     },
-    status: {
-      type: String,
-      enum: ["SUCCESS", "ERROR"],
-     },
+    
 
   spans: [
   {
@@ -67,6 +63,10 @@ const traceSchema = new Schema(
       type: Number,
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["SUCCESS", "ERROR"],
+     },
     metadata: {
       type: Schema.Types.Mixed,
       default: {},
