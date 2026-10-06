@@ -28,9 +28,11 @@ export async function GET(req: NextRequest) {
 
     step = "fetching traces";
     console.log("[TRACES] Step 3: fetching traces for project:", projectId);
-    const traces = await Trace.find({ projectId:projectId  })
-      .sort({ startedAt: -1 })
-      .lean();
+const traces = await Trace.find({
+  projectId: new mongoose.Types.ObjectId(projectId),
+})
+  .sort({ startedAt: -1 })
+  .lean();
 
     console.log("[TRACES] Step 3: traces fetched successfully:", traces.length);
     console.log("[TRACES] ===== GET /api/traces completed =====");
