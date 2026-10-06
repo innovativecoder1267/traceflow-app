@@ -1,6 +1,27 @@
 import mongoose, { Schema, model } from "mongoose";
 
-const traceSchema = new Schema(
+interface ITrace {
+  projectId: mongoose.Types.ObjectId;
+  id?: string;
+  method?: string;
+  path?: string;
+  statusCode?: number;
+  startedAt: Date;
+  endedAt: Date;
+  duration: number;
+  userId: mongoose.Types.ObjectId;
+
+  spans: {
+    name: string;
+    startedAt: Date;
+    endedAt: Date;
+    duration: number;
+    status?: "SUCCESS" | "ERROR";
+    metadata?: Record<string, unknown>;
+  }[];
+}
+
+const traceSchema = new Schema<ITrace>(
   {
     projectId: {
       type: Schema.Types.ObjectId,
@@ -12,10 +33,11 @@ const traceSchema = new Schema(
       type: String,
       unique: true,
     },
+
     method: {
       type: String,
-      
     },
+
     path: {
       type: String,
     },
@@ -38,45 +60,49 @@ const traceSchema = new Schema(
       type: Number,
       required: true,
     },
-    userId:{
+
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    
 
-  spans: [
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    startedAt: {
-      type: Date,
-      required: true,
-    },
-    endedAt: {
-      type: Date,
-      required: true,
-    },
-    duration: {
-      type: Number,
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ["SUCCESS", "ERROR"],
-     },
-    metadata: {
-      type: Schema.Types.Mixed,
-      default: {},
-    },
-  },
-],
+    spans: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        startedAt: {
+          type: Date,
+          required: true,
+        },
+        endedAt: {
+          type: Date,
+          required: true,
+        },
+        duration: {
+          type: Number,
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ["SUCCESS", "ERROR"],
+        },
+        metadata: {
+          type: Schema.Types.Mixed,
+          default: {},
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
-const Trace=mongoose.models.trace|| model("trace",traceSchema)
-export default Trace
+
+const Trace =
+  mongoose.models.trace ||
+  model<ITrace>("trace", traceSchema);
+
+export default Trace;
