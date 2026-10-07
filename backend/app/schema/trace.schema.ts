@@ -1,6 +1,6 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 
-interface ITrace {
+interface ITrace extends Document {
   projectId: mongoose.Types.ObjectId;
   id?: string;
   method?: string;
@@ -17,7 +17,7 @@ interface ITrace {
     endedAt: Date;
     duration: number;
     status?: "SUCCESS" | "ERROR";
-    metadata?: Record<string, unknown>;
+    metadata?: mongoose.Schema.Types.Mixed;
   }[];
 }
 
@@ -34,17 +34,11 @@ const traceSchema = new Schema<ITrace>(
       unique: true,
     },
 
-    method: {
-      type: String,
-    },
+    method: String,
 
-    path: {
-      type: String,
-    },
+    path: String,
 
-    statusCode: {
-      type: Number,
-    },
+    statusCode: Number,
 
     startedAt: {
       type: Date,
@@ -102,7 +96,7 @@ const traceSchema = new Schema<ITrace>(
 );
 
 const Trace =
-  mongoose.models.trace ||
-  model<ITrace>("trace", traceSchema);
+  mongoose.models.Trace ||
+  model<ITrace>("Trace", traceSchema);
 
 export default Trace;
