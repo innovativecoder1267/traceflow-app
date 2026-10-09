@@ -8,17 +8,17 @@ export async function GET(req: NextRequest) {
 
     const projectId = req.nextUrl.searchParams.get("projectId");
 
- 
-
-    const traces = await Trace.findOne({projectId})
-      .sort({ startedAt: -1 })
-      .lean();
-   if (!projectId) {
+    if (!projectId) {
       return NextResponse.json(
         { message: "Project ID is required" },
         { status: 400 }
       );
     }
+
+    const traces = await Trace.findOne({projectId})
+      .sort({ startedAt: -1 })
+      .lean();
+
     return NextResponse.json(
       {
         traces,
