@@ -1,27 +1,6 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
-interface ITrace extends Document {
-  projectId: mongoose.Types.ObjectId;
-  id?: string;
-  method?: string;
-  path?: string;
-  statusCode?: number;
-  startedAt: Date;
-  endedAt: Date;
-  duration: number;
-  userId: mongoose.Types.ObjectId;
-
-  spans: {
-    name: string;
-    startedAt: Date;
-    endedAt: Date;
-    duration: number;
-    status?: "SUCCESS" | "ERROR";
-    metadata?: mongoose.Schema.Types.Mixed;
-  }[];
-}
-
-const traceSchema = new Schema<ITrace>(
+const traceSchema = new Schema(
   {
     projectId: {
       type: Schema.Types.ObjectId,
@@ -33,12 +12,17 @@ const traceSchema = new Schema<ITrace>(
       type: String,
       unique: true,
     },
+    method: {
+      type: String,
+      
+    },
+    path: {
+      type: String,
+    },
 
-    method: String,
-
-    path: String,
-
-    statusCode: Number,
+    statusCode: {
+      type: Number,
+    },
 
     startedAt: {
       type: Date,
@@ -54,49 +38,49 @@ const traceSchema = new Schema<ITrace>(
       type: Number,
       required: true,
     },
-
-    userId: {
+    userId:{
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    
 
-    spans: [
-      {
-        name: {
-          type: String,
-          required: true,
-        },
-        startedAt: {
-          type: Date,
-          required: true,
-        },
-        endedAt: {
-          type: Date,
-          required: true,
-        },
-        duration: {
-          type: Number,
-          required: true,
-        },
-        status: {
-          type: String,
-          enum: ["SUCCESS", "ERROR"],
-        },
-        metadata: {
-          type: Schema.Types.Mixed,
-          default: {},
-        },
-      },
-    ],
+  spans: [
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    startedAt: {
+      type: Date,
+      required: true,
+    },
+    endedAt: {
+      type: Date,
+      required: true,
+    },
+    duration: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["SUCCESS", "ERROR"],
+     },
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+  },
+],
   },
   {
     timestamps: true,
   }
 );
-
 const Trace =
   mongoose.models.Trace ||
-  model<ITrace>("Trace", traceSchema);
+  mongoose.model("Trace", traceSchema);
 
 export default Trace;
+
