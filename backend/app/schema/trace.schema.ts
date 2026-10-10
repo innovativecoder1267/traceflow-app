@@ -1,4 +1,4 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model, type Model  } from "mongoose";
 
 const traceSchema = new Schema(
   {
@@ -78,9 +78,8 @@ const traceSchema = new Schema(
     timestamps: true,
   }
 );
-const Trace =
-  mongoose.models.Trace ||
-  mongoose.model("Trace", traceSchema);
+const Trace: Model<any> =
+  (mongoose.models.Trace as Model<any>) ||
+  model<any>("Trace", traceSchema);
 
 export default Trace;
-
