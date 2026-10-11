@@ -1,13 +1,19 @@
 import Trace from "@/app/schema/trace.schema";
 import { DbConnection } from "@/lib/db.connection";
-export async function POST(req:Request){
+import Project from "@/app/schema/project.schema";
+import { NextRequest } from "next/server";
+export async function POST(req:NextRequest){
     await DbConnection()
-    await Trace.syncIndexes();
-    const {trace}=await req.json();
+
+    const {trace}=await req.json()
     if(!trace){
         throw new Error("Cant find trace") 
     }
-    console.log("Trace is",trace)
+ const project = await Project.findOne({ ownerId:trace.userId });
+
+    if (!project) {
+    throw new Error("Project not found");
+   }
     const newtrace=await Trace.create(trace)
     if(!newtrace){
         throw new Error("Cant create the trace")
