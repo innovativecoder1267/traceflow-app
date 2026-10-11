@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const traces = await Trace.findOne({projectId})
+    const traces = await Trace.find({projectId})
       .sort({ startedAt: -1 })
       .lean();
 
