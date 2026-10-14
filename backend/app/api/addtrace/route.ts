@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         message: "Trace added successfully",
         traceId: newtrace._id,
       },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Add trace error:", error);
