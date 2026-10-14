@@ -60,7 +60,12 @@ export async function POST(req: NextRequest) {
       ...trace,
       userId,
     });
-
+    if(!newtrace){
+       return NextResponse.json(
+        { message: "Trace isnt getting created" },
+        { status: 402 }
+      );
+    }
     // 8. Return response
     return NextResponse.json(
       {
