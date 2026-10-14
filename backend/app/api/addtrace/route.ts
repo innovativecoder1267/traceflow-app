@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "Trace added successfully",
-        traceId: newtrace._id,
+        traceId: .newtrace_id,
+        newtrace
       },
       { status: 200 }
     );
