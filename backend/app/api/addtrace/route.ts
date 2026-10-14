@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
+    console.log("Api key is",apikey)
 
     // 4. Validate trace
     if (!trace) {
