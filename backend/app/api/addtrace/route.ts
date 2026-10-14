@@ -2,19 +2,23 @@ import Trace from "@/app/schema/trace.schema";
 import { DbConnection } from "@/lib/db.connection";
 import Project from "@/app/schema/project.schema";
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
-export async function POST(req:NextRequest){
+ export async function POST(req:NextRequest){
     await DbConnection()
-   const {userId}=await getCurrentUser(req)
-    const {trace}=await req.json()
-    if(!trace){
-        throw new Error("Cant find trace") 
+     const {trace}=await req.json();
+     const apikey=req.headers.get("authorization")
+     console.log("Api Key is",apikey)
+    if(!trace||!apikey){
+        throw new Error("Cant find trace or apikey") 
     }
- const project = await Project.findOne({ _id:trace.projectId });
 
-    if (!project) {
-    throw new Error("Project not found");
-   }
+    const validateapikey=await Project.findOne({apikey},{
+        status:"ACTIVE"
+    })
+    if(!validateapikey){
+        throw new Error("Api key not found")
+    }
+ 
+   const userId=validateapikey.ownerId
      const newtrace = await Trace.create({
     ...trace,
     userId,
