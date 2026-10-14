@@ -38,12 +38,12 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 5. Validate API key and project status
+ 
     const validateapikey = await Project.findOne({
-      apikey,
+      apiKey: apikey,
       status: "ACTIVE",
     });
+
 
     if (!validateapikey) {
       return NextResponse.json(
