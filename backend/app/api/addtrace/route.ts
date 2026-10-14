@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     // 7. Create trace
     const newtrace = await Trace.create({
-      ...trace,
+      newtrace,
       userId,
     });
     if(!newtrace){
