@@ -153,7 +153,7 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
                 })}
               </div>
               {chosen && <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] p-4 sm:p-5"><div className="mb-3 flex items-center justify-between gap-3"><h3 className="text-sm font-semibold">Operation details</h3><span className="text-xs text-[var(--color-muted-foreground)]">Stage {selected + 1} of {stages.length}</span></div><div className="break-words text-sm font-medium">{chosen.name}</div>
-                {chosen.span ? <div className="mt-3 space-y-3"><div className="grid grid-cols-1 gap-3 sm:grid-cols-3"><Detail label="Type" value={chosen.span.type || inferredType(chosen.span)} /><Detail label="Duration" value={chosen.duration + " ms"} /><Detail label="Status" value={chosen.span.status || "Not recorded"} /></div>{chosen.metadata && Object.keys(chosen.metadata).length > 0 && <div><div className="mb-1.5 text-xs text-[var(--color-muted-foreground)]">Recorded metadata</div><pre className="max-h-72 overflow-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-3 text-xs leading-relaxed">{JSON.stringify(chosen.metadata, null, 2)}</pre></div>}</div> : <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted-foreground)]">{chosen.kind === "request" ? "The incoming request started the trace. Only operations recorded by TraceFlow are shown." : "The request finished. Total duration and response status are shown in the trace summary."}</p>}
+                {chosen.span ? <div className="mt-3 space-y-3"><div className="grid grid-cols-1 gap-3 sm:grid-cols-3"><Detail label="Type" value={chosen.span.type || inferredType(chosen.span)} /><Detail label="Duration" value={chosen.duration + " ms"} /><Detail label="Status" value={chosen.span.status || "Not recorded"} /></div>{chosen.kind === "http" && <HttpPathBreakdown metadata={chosen.metadata} fallbackDuration={chosen.duration} />}{chosen.metadata && Object.keys(chosen.metadata).length > 0 && <div><div className="mb-1.5 text-xs text-[var(--color-muted-foreground)]">Recorded metadata</div><pre className="max-h-72 overflow-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-3 text-xs leading-relaxed">{JSON.stringify(chosen.metadata, null, 2)}</pre></div>}</div> : <p className="mt-2 text-xs leading-relaxed text-[var(--color-muted-foreground)]">{chosen.kind === "request" ? "The incoming request started the trace. Only operations recorded by TraceFlow are shown." : "The request finished. Total duration and response status are shown in the trace summary."}</p>}
               </div>}
               {(!trace.spans || trace.spans.length === 0) && <p className="rounded-lg border border-dashed border-[var(--color-border)] p-4 text-xs text-[var(--color-muted-foreground)]">No span info found for this trace. You can still inspect the incoming request and completion timing.</p>}
             </div>
@@ -190,4 +190,62 @@ function inferredType(span: Span): string {
   if (/http|fetch|api|url/.test(value)) return "HTTP";
   if (/database|mongo|query|redis|sql|db/.test(value)) return "Database";
   return "Custom";
+}
+function HttpPathBreakdown({ metadata, fallbackDuration }: { metadata?: Record<string, unknown>; fallbackDuration: number }) {
+  const entries = useMemo(() => extractPathTimings(metadata, fallbackDuration), [metadata, fallbackDuration]);
+  if (entries.length === 0) return null;
+  return <section className="rounded-lg border border-[var(--color-border)] p-3">
+    <div className="mb-3"><h4 className="text-sm font-medium">HTTP path breakdown</h4><p className="mt-1 text-xs text-[var(--color-muted-foreground)]">Path-level timings recorded for this HTTP operation.</p></div>
+    <div className="space-y-3">{entries.map((entry, index) => {
+      const max = Math.max(fallbackDuration, ...entries.map((item) => item.duration), 1);
+      const width = Math.max(1, Math.min(100, entry.duration / max * 100));
+      return <div key={entry.path + "-" + index}>
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2"><span className="break-all font-mono text-xs">{entry.method ? entry.method + " " : ""}{entry.path}</span><span className="shrink-0 font-mono text-xs text-[var(--color-muted-foreground)]">{formatDuration(entry.duration)} ms</span></div>
+        <div className="h-2 overflow-hidden rounded-full bg-[var(--color-muted)]/25"><div className="h-full rounded-full bg-sky-400" style={{ width: width + "%" }} /></div>
+      </div>;
+    })}</div>
+  </section>;
+}
+function extractPathTimings(metadata: Record<string, unknown> | undefined, fallbackDuration: number): Array<{ path: string; method?: string; duration: number }> {
+  if (!metadata) return [];
+  const results: Array<{ path: string; method?: string; duration: number }> = [];
+  const seen = new Set<string>();
+  const pathKeys = new Set(["path", "pathname", "url", "route", "requestpath", "requesturl"]);
+  const durationKeys = new Set(["duration", "durationms", "elapsed", "elapsedms", "took", "timems", "latency", "latencyms"]);
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z]/g, "");
+  function visit(value: unknown, depth: number) {
+    if (!value || typeof value !== "object" || depth > 5) return;
+    if (Array.isArray(value)) { value.forEach((item) => visit(item, depth + 1)); return; }
+    const object = value as Record<string, unknown>;
+    let path: string | undefined;
+    let method: string | undefined;
+    let duration: number | undefined;
+    for (const [key, item] of Object.entries(object)) {
+      const normalized = normalize(key);
+      if (typeof item === "string" && pathKeys.has(normalized) && item.trim()) path = item;
+      if (typeof item === "string" && normalized === "method") method = item;
+      if ((typeof item === "number" || (typeof item === "string" && item.trim() !== "")) && durationKeys.has(normalized)) {
+        const parsed = Number(item);
+        if (Number.isFinite(parsed) && parsed >= 0 && parsed < 1000000000) duration = parsed;
+      }
+    }
+    if (path) {
+      const identity = (method || "") + " " + path;
+      if (!seen.has(identity)) {
+        seen.add(identity);
+        results.push({ path: displayPath(path), method, duration: duration ?? fallbackDuration });
+      }
+    }
+    Object.values(object).forEach((item) => visit(item, depth + 1));
+  }
+  visit(metadata, 0);
+  return results;
+}
+function displayPath(value: string): string {
+  try {
+    const parsed = new URL(value);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return value;
+  }
 }
