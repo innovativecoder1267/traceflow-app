@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowDown, CheckCircle2, Clock3, Database, Globe, Pause, Play, RotateCcw, Activity, AlertCircle } from "lucide-react";
 import type { Span, Trace } from "@/types/trace";
 
@@ -79,11 +79,7 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
   const tick = useCallback((now: number) => {
     if (last.current === null) last.current = now;
     const delta = now - last.current; last.current = now;
-    setProgress((p) => {
-      const next = p + delta / 9000 * 100 * speed;
-      if (next >= 100) { stop(); return 100; }
-      return next;
-    });
+    setProgress((p) => Math.min(100, p + delta / 9000 * 100 * speed));
     frame.current = requestAnimationFrame(tick);
   }, [speed, stop]);
   useEffect(() => {
@@ -93,6 +89,7 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
   }, [playing, tick]);
   useEffect(() => () => { if (frame.current !== null) cancelAnimationFrame(frame.current); }, []);
   useEffect(() => { if (playing) setSelected(current); }, [playing, current]);
+  useEffect(() => { if (playing && progress >= 100) stop(); }, [playing, progress, stop]);
 
   const activeTrace = !!trace && trace.statusCode >= 200 && trace.statusCode < 400;
   const chosen = stages[selected];
@@ -156,7 +153,7 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
   );
 }
 
-function Metric({ label, value, icon }: { label: string; value: string; icon: React.ReactNode }) {
+function Metric({ label, value, icon }: { label: string; value: string; icon: ReactNode }) {
   return <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4"><div className="mb-3 flex items-center justify-between text-[var(--color-muted-foreground)]"><span className="text-xs">{label}</span>{icon}</div><div className="break-words text-sm font-semibold">{value}</div></div>;
 }
 function Detail({ label, value }: { label: string; value: string }) {
