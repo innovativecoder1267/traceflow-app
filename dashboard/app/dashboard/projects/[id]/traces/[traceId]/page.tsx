@@ -49,11 +49,15 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
     const start = toMs(trace.startedAt);
     const total = Math.max(1, Number(trace.duration) || 0, toMs(trace.endedAt) - start);
     const spans = (Array.isArray(trace.spans) ? trace.spans : []).map((span, i) => {
-      const spanStart = Math.max(0, toMs(span.startedAt) - start);
-      const spanEnd = span.endedAt ? Math.max(spanStart, toMs(span.endedAt) - start) : spanStart + (Number(span.duration) || 0);
+      const absoluteSpanStart = toMs(span.startedAt);
+      const absoluteSpanEnd = span.endedAt ? toMs(span.endedAt) : 0;
+      const spanStart = Math.max(0, absoluteSpanStart - start);
+      const measuredDuration = absoluteSpanEnd > absoluteSpanStart
+        ? absoluteSpanEnd - absoluteSpanStart
+        : safeDuration(span.duration);
       const label = (String(span.type || "") + " " + span.name).toLowerCase();
       const kind: Stage["kind"] = /http|fetch|request|api/.test(label) ? "http" : /db|database|mongo|query|redis|sql/.test(label) ? "db" : "other";
-      return { key: span.name + "-" + i, name: span.name || "Span " + (i + 1), kind, start: spanStart, duration: Number(span.duration) || Math.max(0, spanEnd - spanStart), status: span.status, metadata: span.metadata, span };
+      return { key: span.name + "-" + i, name: span.name || "Span " + (i + 1), kind, start: spanStart, duration: measuredDuration, status: span.status, metadata: span.metadata, span };
     }).sort((a, b) => a.start - b.start);
     return [
       { key: "incoming", name: "Incoming request · " + trace.method + " " + (trace.path || trace.route || ""), kind: "request", start: 0, duration: 0, status: "Recorded" },
@@ -167,7 +171,12 @@ function toMs(value?: string | number): number {
   const parsed = new Date(value).getTime();
   return Number.isFinite(parsed) ? parsed : 0;
 }
-function formatDuration(value: number): string { return Number.isFinite(value) ? value.toFixed(value < 10 ? 1 : 0) : "0"; }
+function safeDuration(value: unknown): number {
+  const duration = typeof value === "number" ? value : Number(value);
+  // Epoch timestamps are around 1e12 ms; they are not elapsed durations.
+  return Number.isFinite(duration) && duration >= 0 && duration < 1000000000 ? duration : 0;
+}
+function formatDuration(value: number): string { return Number.isFinite(value) && value >= 0 ? value.toFixed(value < 10 ? 1 : 0) : "0"; }
 function formatDate(value: string | number): string { const date = new Date(value); return Number.isNaN(date.getTime()) ? "Unavailable" : date.toLocaleString(); }
 function inferredType(span: Span): string {
   const value = (span.name + " " + JSON.stringify(span.metadata ?? {})).toLowerCase();
