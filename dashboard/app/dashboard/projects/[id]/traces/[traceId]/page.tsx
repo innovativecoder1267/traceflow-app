@@ -52,9 +52,15 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
       const absoluteSpanStart = toMs(span.startedAt);
       const absoluteSpanEnd = span.endedAt ? toMs(span.endedAt) : 0;
       const spanStart = Math.max(0, absoluteSpanStart - start);
-      const measuredDuration = absoluteSpanEnd > absoluteSpanStart
+      const endBasedDuration = absoluteSpanEnd > absoluteSpanStart
         ? absoluteSpanEnd - absoluteSpanStart
-        : safeDuration(span.duration);
+        : 0;
+      const measuredDuration = Math.min(
+        total,
+        endBasedDuration > 0 && endBasedDuration < 1000000000
+          ? endBasedDuration
+          : safeDuration(span.duration)
+      );
       const label = (String(span.type || "") + " " + span.name).toLowerCase();
       const kind: Stage["kind"] = /http|fetch|request|api/.test(label) ? "http" : /db|database|mongo|query|redis|sql/.test(label) ? "db" : "other";
       return { key: span.name + "-" + i, name: span.name || "Span " + (i + 1), kind, start: spanStart, duration: measuredDuration, status: span.status, metadata: span.metadata, span };
@@ -83,9 +89,10 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
   const tick = useCallback((now: number) => {
     if (last.current === null) last.current = now;
     const delta = now - last.current; last.current = now;
-    setProgress((p) => Math.min(100, p + delta / 9000 * 100 * speed));
+    const journeyDuration = Math.max(1, Number(trace?.duration) || 1);
+    setProgress((p) => Math.min(100, p + delta / journeyDuration * 100 * speed));
     frame.current = requestAnimationFrame(tick);
-  }, [speed, stop]);
+  }, [speed, trace?.duration]);
   useEffect(() => {
     if (playing) { last.current = null; frame.current = requestAnimationFrame(tick); }
     else if (frame.current !== null) { cancelAnimationFrame(frame.current); frame.current = null; last.current = null; }
@@ -134,12 +141,12 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
                   const isActive = (playing ? current : selected) === i;
                   const left = Math.min(100, Math.max(0, stage.start / duration * 100));
                   const width = stage.duration > 0 ? Math.max(1.5, Math.min(100 - left, stage.duration / duration * 100)) : 1.5;
-                  return <button key={stage.key} type="button" onClick={() => { stop(); setSelected(i); setProgress(Math.min(100, stage.start / duration * 100)); }} className={"block w-full rounded-xl border p-3 text-left transition-all duration-300 sm:p-4 " + (isActive ? "border-[var(--color-foreground)]/50 bg-[var(--color-muted)]/15" : "border-[var(--color-border)] hover:border-[var(--color-muted-foreground)]/40")}>
+                  return <button key={stage.key} type="button" onClick={() => { stop(); setSelected(i); }} className={"block w-full rounded-xl border p-3 text-left transition-all duration-300 sm:p-4 " + (isActive ? "border-[var(--color-foreground)]/50 bg-[var(--color-muted)]/15" : "border-[var(--color-border)] hover:border-[var(--color-muted-foreground)]/40")}>
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]">{stage.kind === "http" ? <Globe size={16} /> : stage.kind === "db" ? <Database size={16} /> : stage.kind === "response" ? <CheckCircle2 size={16} /> : stage.kind === "request" ? <ArrowDown size={16} /> : <Activity size={16} />}</div>
                       <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center justify-between gap-2"><span className="break-words text-sm font-medium">{stage.name}</span><span className="font-mono text-xs text-[var(--color-muted-foreground)]">{stage.duration > 0 ? formatDuration(stage.duration) + " ms" : stage.kind === "request" ? "Start" : "End"}</span></div>
                         <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-[var(--color-muted-foreground)]">{stage.span && <span>{stage.kind === "http" ? "HTTP span" : stage.kind === "db" ? "Database span" : "Custom span"}</span>}{stage.status && <span>· {stage.status}</span>}{stage.start > 0 && <span>· starts at {formatDuration(stage.start)} ms</span>}</div>
-                        <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-muted)]/25"><div className={"absolute top-0 h-full rounded-full transition-all duration-500 " + (stage.kind === "http" ? "bg-sky-400" : stage.kind === "db" ? "bg-emerald-400" : "bg-[var(--color-foreground)]/60")} style={{ left: left + "%", width: width + "%" }} />{isActive && playing && <div className="absolute inset-y-0 w-1 animate-pulse rounded-full bg-[var(--color-foreground)]" style={{ left: Math.min(99, progress) + "%" }} />}</div>
+                        <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-muted)]/25"><div className={"absolute top-0 h-full rounded-full " + (stage.kind === "http" ? "bg-sky-400" : stage.kind === "db" ? "bg-emerald-400" : "bg-[var(--color-foreground)]/60")} style={{ left: left + "%", width: width + "%" }} />{playing && progress * duration / 100 >= stage.start && progress * duration / 100 <= stage.start + Math.max(stage.duration, 1) && <div className="absolute inset-y-0 w-1 rounded-full bg-[var(--color-foreground)] transition-[left] duration-75" style={{ left: Math.min(99, progress) + "%" }} />}</div>
                       </div>
                     </div>
                   </button>;
