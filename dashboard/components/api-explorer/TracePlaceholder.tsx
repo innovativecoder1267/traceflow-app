@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -106,11 +108,12 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
                       {trace.duration}ms · {formatStartedAt(trace.startedAt)}
                     </p>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setExpandedTraceId(isExpanded ? null : traceKey)
-                      }
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedTraceId(isExpanded ? null : traceKey)
+                        }
                       className="group inline-flex items-center gap-1.5 rounded-md py-1 font-medium text-[var(--color-foreground)] transition-colors hover:text-[var(--color-muted-foreground)]"
                       aria-expanded={isExpanded}
                     >
@@ -120,7 +123,14 @@ export function TracePlaceholder({ projectId }: TracePlaceholderProps) {
                         }`}
                       />
                       <span>{isExpanded ? "Hide spans" : `Spans · ${spans.length}`}</span>
-                    </button>
+                      </button>
+                      <Link
+                        href={`/dashboard/projects/${encodeURIComponent(projectId)}/traces/${encodeURIComponent(trace._id || trace.id || trace.traceId || traceKey)}`}
+                        className="inline-flex items-center gap-1 rounded-md py-1 font-medium text-[var(--color-foreground)] transition-colors hover:text-[var(--color-muted-foreground)]"
+                      >
+                        See details <ArrowUpRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
                   </div>
 
                   <div
