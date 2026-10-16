@@ -1,3 +1,4 @@
+
 import Trace from "@/app/schema/trace.schema";
 import { DbConnection } from "@/lib/db.connection";
 import Project from "@/app/schema/project.schema";
@@ -7,10 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     await DbConnection();
 
-    // 1. Get trace from request body
     const { trace } = await req.json();
-
-    // 2. Get Authorization header
     const authorization = req.headers.get("authorization");
 
     if (!authorization) {
@@ -20,7 +18,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Extract Bearer token
     const [scheme, apikey] = authorization.split(" ");
 
     if (scheme !== "Bearer" || !apikey) {
@@ -29,50 +26,65 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
-    console.log("Api key is",apikey)
 
-    // 4. Validate trace
-    if (!trace) {
+    if (!trace || !Array.isArray(trace.spans)) {
       return NextResponse.json(
-        { message: "Trace is required" },
+        { message: "Trace and spans array are required" },
         { status: 400 }
       );
     }
- 
-    const validateapikey = await Project.findOne({
+
+    const project = await Project.findOne({
       apiKey: apikey,
       status: "ACTIVE",
     });
 
-
-    if (!validateapikey) {
+    if (!project) {
       return NextResponse.json(
         { message: "Invalid API key or inactive project" },
         { status: 401 }
       );
     }
 
-    // 6. Get project owner
-    const userId = validateapikey.ownerId;
+    const newTrace = await Trace.create({
+      id: trace.id,
+      projectId: project._id,
+      userId: project.ownerId,
 
-    // 7. Create trace
-    const newtrace = await Trace.create({
-      trace,
-      userId,
+      method: trace.method,
+      path: trace.path,
+      statusCode: trace.statusCode,
+
+      startedAt: trace.startedAt
+        ? new Date(trace.startedAt)
+        : undefined,
+
+      endedAt: trace.endedAt
+        ? new Date(trace.endedAt)
+        : undefined,
+
+      duration: trace.duration,
+
+      spans: trace.spans.map((span: any) => ({
+        name: span.name,
+        startedAt: span.startedAt
+          ? new Date(span.startedAt)
+          : undefined,
+        endedAt: span.endedAt
+          ? new Date(span.endedAt)
+          : undefined,
+        duration: span.duration,
+        status: span.status,
+        metadata: span.metadata ?? {},
+      })),
     });
-    if(!newtrace){
-       return NextResponse.json(
-        { message: "Trace isnt getting created" },
-        { status: 402 }
-      );
-    }
-    // 8. Return response
+
     return NextResponse.json(
       {
         message: "Trace added successfully",
-        traceobj:newtrace,
+        traceobj: newTrace,
       },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
     console.error("Add trace error:", error);
