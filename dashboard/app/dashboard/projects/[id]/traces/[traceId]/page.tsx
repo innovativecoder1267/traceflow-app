@@ -63,7 +63,9 @@ export default function TraceJourneyPage({ params }: { params: Promise<Params> }
       );
       const label = (String(span.type || "") + " " + span.name).toLowerCase();
       const kind: Stage["kind"] = /http|fetch|request|api/.test(label) ? "http" : /db|database|mongo|query|redis|sql/.test(label) ? "db" : "other";
-      return { key: span.name + "-" + i, name: span.name || "Span " + (i + 1), kind, start: spanStart, duration: measuredDuration, status: span.status, metadata: span.metadata, span };
+      const recordedPath = kind === "http" ? extractPathTimings(span.metadata, measuredDuration)[0]?.path : undefined;
+      const displayName = kind === "http" && recordedPath ? "HTTP request · " + recordedPath : span.name || "Span " + (i + 1);
+      return { key: span.name + "-" + i, name: displayName, kind, start: spanStart, duration: measuredDuration, status: span.status, metadata: span.metadata, span };
     }).sort((a, b) => a.start - b.start);
     return [
       { key: "incoming", name: "Incoming request · " + trace.method + " " + (trace.path || trace.route || ""), kind: "request", start: 0, duration: 0, status: "Recorded" },
