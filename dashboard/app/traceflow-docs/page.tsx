@@ -46,6 +46,12 @@ const SECTIONS = [
     keywords: ["trace", "request", "instrumentation"],
   },
   {
+    id: "http-instrumentation",
+    label: "Automatic HTTP Instrumentation",
+    group: "Tracing",
+    keywords: ["http", "fetch", "outgoing", "external api", "path", "duration"],
+  },
+  {
     id: "custom-spans",
     label: "Custom Spans",
     group: "Tracing",
@@ -523,6 +529,53 @@ app.get("/users", (req, res) => {
             </Callout>
           </Reveal>
  
+          <Reveal as="section" id="http-instrumentation" delay={40} className="tfd-section">
+            <div className="tfd-section-kicker">
+              <Boxes size={13} /> Tracing
+            </div>
+            <h2>Automatic HTTP Instrumentation</h2>
+            <p>
+              TraceFlow automatically records outgoing HTTP requests as spans inside the
+              active request trace. Once the SDK is initialized, you can inspect captured
+              HTTP calls without manually wrapping each call in a custom span.
+            </p>
+            <p>
+              Each recorded HTTP span is shown separately in the Request Journey. When
+              the captured metadata is available, the span can show the destination path,
+              HTTP method, response status, elapsed time, and error information. This helps
+              you spot which external request took the time, instead of seeing only the
+              total duration of the incoming Express request.
+            </p>
+            <CodeBlock
+              lang="ts"
+              filename="server.ts"
+              code={`app.get("/pokemon", async (req, res) => {
+  // TraceFlow records outgoing HTTP calls automatically.
+  const response = await fetch("https://example.com/api/pokemon");
+  const data = await response.json();
+
+  res.json(data);
+});`}
+            />
+            <p>
+              Open a trace in the dashboard and select an HTTP request span to inspect its
+              recorded path and timing details. If a request contains multiple HTTP calls,
+              each captured call appears as its own span, so you can compare their durations
+              and investigate the slow operation.
+            </p>
+            <Callout type="info" title="What gets recorded">
+              TraceFlow focuses on request diagnostics such as the HTTP method, host or
+              path, status, duration, and error details when available. Authorization
+              headers, cookies, API keys, and request or response bodies are not captured
+              by default.
+            </Callout>
+            <Callout type="warning" title="Timing interpretation">
+              Individual HTTP spans can overlap when requests run concurrently. Do not add
+              every span duration together and assume it equals the total incoming request
+              duration.
+            </Callout>
+          </Reveal>
+
           <Reveal as="section" id="custom-spans" delay={40} className="tfd-section">
             <div className="tfd-section-kicker">
               <Boxes size={13} /> Tracing
