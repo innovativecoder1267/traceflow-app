@@ -5,7 +5,6 @@ const traceSchema = new Schema(
     projectId: {
       type: Schema.Types.ObjectId,
       ref: "Project",
-      required: true,
     },
 
     id: {
@@ -26,22 +25,18 @@ const traceSchema = new Schema(
 
     startedAt: {
       type: Date,
-      required: true,
     },
 
     endedAt: {
       type: Date,
-      required: true,
     },
 
     duration: {
       type: Number,
-      required: true,
     },
     userId:{
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     
 
@@ -49,19 +44,15 @@ const traceSchema = new Schema(
   {
     name: {
       type: String,
-      required: true,
     },
     startedAt: {
       type: Date,
-      required: true,
     },
     endedAt: {
       type: Date,
-      required: true,
     },
     duration: {
       type: Number,
-      required: true,
     },
     status: {
       type: String,
