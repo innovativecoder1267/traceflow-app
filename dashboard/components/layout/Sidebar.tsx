@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,8 +9,11 @@ import {
   GitBranch,
   Settings,
   X,
+  ChartNoAxesCombined,
+  LockKeyhole,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useSubscription } from "@/providers/SubscriptionProvider";
 
 interface SidebarProps {
   mobileOpen: boolean;
@@ -20,6 +24,12 @@ const navItems = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", href: "/dashboard/projects", icon: FolderOpen },
   { label: "Traces", href: "/dashboard/traces", icon: GitBranch },
+  {
+    label: "Performance Analytics",
+    href: "/dashboard/performance-analytics",
+    icon: ChartNoAxesCombined,
+    premium: true,
+  },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -30,6 +40,9 @@ function SidebarContent({
   pathname: string;
   onClose?: () => void;
 }) {
+  const { subscription, isSubscriptionLoading } = useSubscription();
+  const hasPremiumAccess = subscription === "premium" && !isSubscriptionLoading;
+
   return (
     <div className="flex flex-col h-full">
       {/* Logo */}
@@ -55,22 +68,28 @@ function SidebarContent({
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ label, href, icon: Icon }) => {
-          const isActive = pathname === href;
+        {navItems.map(({ label, href, icon: Icon, premium }) => {
+          const isActive =
+            pathname === href || (href !== "/dashboard" && pathname.startsWith(`${href}/`));
+          const locked = Boolean(premium) && !hasPremiumAccess;
+
           return (
             <Link
               key={href}
               href={href}
               onClick={onClose}
+              aria-label={locked ? `${label} (Premium feature, locked)` : label}
               className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                 isActive
                   ? "bg-[var(--color-accent)] text-[var(--color-foreground)] font-medium"
-                  : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-foreground)]"
+                  : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-foreground)]",
+                locked && "opacity-80"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {label}
+              <span className="flex-1">{label}</span>
+              {locked && <LockKeyhole className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
             </Link>
           );
         })}
