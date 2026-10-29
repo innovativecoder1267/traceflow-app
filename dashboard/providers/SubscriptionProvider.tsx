@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export type SubscriptionPlan = "free" | "premium";
 
@@ -25,6 +26,7 @@ const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
 const API_BASE_URL = "https://traceflow-app-k2ed.vercel.app/api";
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [subscription, setSubscription] = useState<SubscriptionPlan>("free");
   const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(true);
 
@@ -44,10 +46,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       // Fail closed for premium UI: an unavailable status never unlocks it.
       console.error("[SUBSCRIPTION] Failed to fetch subscription status:", error);
       setSubscription("free");
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        router.replace("/login");
+        router.refresh();
+      }
     } finally {
       setIsSubscriptionLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     void refreshSubscription();
