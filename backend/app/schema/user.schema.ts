@@ -23,6 +23,11 @@ const userSchema = new Schema(
       type: Boolean,
       default: false
     },
+    subscription: {
+      type: String,
+      enum: ["free", "premium"],
+      default: "free",
+    },
     otp:{
       type:String,
       required:true
