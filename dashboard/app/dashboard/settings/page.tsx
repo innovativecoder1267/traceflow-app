@@ -28,7 +28,7 @@ const API_BASE_URL = "https://traceflow-app-k2ed.vercel.app/api";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { subscription, refreshSubscription } = useSubscription();
+  const { subscription } = useSubscription();
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -85,7 +85,6 @@ export default function SettingsPage() {
     }
 
     setProfile(null);
-    await refreshSubscription();
     router.replace("/login");
     router.refresh();
   }
