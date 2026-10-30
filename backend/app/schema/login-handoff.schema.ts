@@ -20,8 +20,8 @@ const loginHandoffSchema = new Schema(
   { timestamps: true }
 );
 
-const LoginHandoff =
-  mongoose.models.LoginHandoff ||
-  model("LoginHandoff", loginHandoffSchema);
+const LoginHandoff: mongoose.Model<any> =
+  (mongoose.models.LoginHandoff as mongoose.Model<any>) ||
+  model<any>("LoginHandoff", loginHandoffSchema);
 
 export default LoginHandoff;
