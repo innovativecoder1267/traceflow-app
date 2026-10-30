@@ -70,23 +70,29 @@ export default function SettingsPage() {
     setError("");
 
     try {
-      await axios.post(
-        `${API_BASE_URL}/logout`,
-        {},
-        { withCredentials: true }
-      );
-    } catch (logoutError) {
-      // Redirect even if the request fails; the login page will not have a valid
-      // session unless the server still has a valid cookie. Show a message if needed.
-      console.error("[LOGOUT] Logout request failed:", logoutError);
-      setError("The logout request failed. Please try again.");
-      setLoggingOut(false);
-      return;
-    }
+      const [dashboardLogout, backendLogout] = await Promise.all([
+        fetch("/api/auth/logout", {
+          method: "POST",
+          cache: "no-store",
+        }),
+        fetch(`${API_BASE_URL}/logout`, {
+          method: "POST",
+          credentials: "include",
+        }),
+      ]);
 
-    setProfile(null);
-    router.replace("/login");
-    router.refresh();
+      if (!dashboardLogout.ok || !backendLogout.ok) {
+        throw new Error("One or more sessions could not be cleared");
+      }
+
+      setProfile(null);
+      router.replace("/login");
+      router.refresh();
+    } catch (logoutError) {
+      console.error("[LOGOUT] Logout request failed:", logoutError);
+      setError("We couldn't clear both sessions. Please try again.");
+      setLoggingOut(false);
+    }
   }
 
   const plan = profile?.subscription ?? subscription;
