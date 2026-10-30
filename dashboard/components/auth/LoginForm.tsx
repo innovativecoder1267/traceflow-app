@@ -74,7 +74,11 @@ export function LoginForm() {
       }
 
       if (!loginData.handoffCode) {
-        setServerError("Login succeeded, but dashboard session could not be established. Please try again.");
+        await fetch("https://traceflow-app-k2ed.vercel.app/api/logout", {
+          method: "POST",
+          credentials: "include",
+        }).catch(() => undefined);
+        setServerError("Dashboard authentication is not ready on the backend yet. Please try again shortly.");
         return;
       }
 
@@ -91,6 +95,10 @@ export function LoginForm() {
         const sessionData = (await sessionResponse.json().catch(() => null)) as
           | { message?: string }
           | null;
+        await fetch("https://traceflow-app-k2ed.vercel.app/api/logout", {
+          method: "POST",
+          credentials: "include",
+        }).catch(() => undefined);
         setServerError(
           sessionData?.message || "Unable to establish your dashboard session. Please sign in again."
         );
